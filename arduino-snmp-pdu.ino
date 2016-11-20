@@ -35,23 +35,33 @@ static byte gwip[] = { 192, 168, 1, 1 };
 // .iso.org.dod.internet (.1.3.6.1)
 // .iso.org.dod.internet.mgmt (.1.3.6.1.2)
 // .iso.org.dod.internet.mgmt.mib-2 (.1.3.6.1.2.1)
+static const char mib2[] PROGMEM          = "1.3.6.1.2.1";
 // .iso.org.dod.internet.mgmt.mib-2.system (.1.3.6.1.2.1.1)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysDescr (.1.3.6.1.2.1.1.1)
-static const char sysDescr[] PROGMEM      = "1.3.6.1.2.1.1.1.0";  // read-only  (DisplayString)
+static const char sysDescr[] PROGMEM      = "1.3.6.1.2.1.1.1";  // read-only  (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID (.1.3.6.1.2.1.1.2)
-static const char sysObjectID[] PROGMEM   = "1.3.6.1.2.1.1.2.0";  // read-only  (ObjectIdentifier)
+static const char sysObjectID[] PROGMEM   = "1.3.6.1.2.1.1.2";  // read-only  (ObjectIdentifier)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime (.1.3.6.1.2.1.1.3)
-static const char sysUpTime[] PROGMEM     = "1.3.6.1.2.1.1.3.0";  // read-only  (TimeTicks)
+static const char sysUpTime[] PROGMEM     = "1.3.6.1.2.1.1.3";  // read-only  (TimeTicks)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysContact (.1.3.6.1.2.1.1.4)
-static const char sysContact[] PROGMEM    = "1.3.6.1.2.1.1.4.0";  // read-write (DisplayString)
+static const char sysContact[] PROGMEM    = "1.3.6.1.2.1.1.4";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysName (.1.3.6.1.2.1.1.5)
-static const char sysName[] PROGMEM       = "1.3.6.1.2.1.1.5.0";  // read-write (DisplayString)
+static const char sysName[] PROGMEM       = "1.3.6.1.2.1.1.5";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysLocation (.1.3.6.1.2.1.1.6)
-static const char sysLocation[] PROGMEM   = "1.3.6.1.2.1.1.6.0";  // read-write (DisplayString)
+static const char sysLocation[] PROGMEM   = "1.3.6.1.2.1.1.6";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysServices (.1.3.6.1.2.1.1.7)
-static const char sysServices[] PROGMEM   = "1.3.6.1.2.1.1.7.0";  // read-only  (Integer)
+static const char sysServices[] PROGMEM   = "1.3.6.1.2.1.1.7";  // read-only  (Integer)
 //
+static const char enterprises[] PROGMEM = "1.3.6.1.4.1";
 static const char outlets[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.";
+static const char outlets1[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.1";
+static const char outlets2[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.2";
+static const char outlets3[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.3";
+static const char outlets4[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.4";
+static const char outlets5[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.5";
+static const char outlets6[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.6";
+static const char outlets7[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.7";
+static const char outlets8[] PROGMEM   = "1.3.6.1.4.1.318.1.1.4.4.2.1.3.8";
 
 // Arduino defined OIDs
 // .iso.org.dod.internet.private (.1.3.6.1.4)
@@ -109,13 +119,71 @@ void pduReceived()
   //Serial.println(pdu.type, HEX);
   if ( (pdu.type == SNMP_PDU_GET || pdu.type == SNMP_PDU_GET_NEXT || pdu.type == SNMP_PDU_SET)
     && pdu.error == SNMP_ERR_NO_ERROR && api_status == SNMP_API_STAT_SUCCESS ) {
-    //
-    //Serial.println("OK");
-    //while(1);
 
     pdu.OID.toString(oid);
+    Serial.println(oid);
+    
+    if (pdu.type == SNMP_PDU_GET_NEXT) {
+      if (strcmp_P(oid, mib2) == 0) {
+        strcpy_P(oid, sysDescr);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysDescr) == 0) {
+        strcpy_P(oid, sysObjectID);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysObjectID) == 0) {
+        strcpy_P(oid, sysUpTime);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysUpTime) == 0) {
+        strcpy_P(oid, sysContact);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysContact) == 0) {
+        strcpy_P(oid, sysName);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysName) == 0) {
+        strcpy_P(oid, sysLocation);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, sysLocation) == 0) {
+        strcpy_P(oid, sysServices);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, enterprises) == 0) {
+        strcpy_P(oid, outlets1);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets1) == 0) {
+        strcpy_P(oid, outlets2);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets2) == 0) {
+        strcpy_P(oid, outlets3);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets3) == 0) {
+        strcpy_P(oid, outlets4);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets4) == 0) {
+        strcpy_P(oid, outlets5);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets5) == 0) {
+        strcpy_P(oid, outlets6);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets6) == 0) {
+        strcpy_P(oid, outlets7);
+        pdu.OID.fromString(oid);
+      } else if (strcmp_P(oid, outlets7) == 0) {
+        strcpy_P(oid, outlets8);
+        pdu.OID.fromString(oid);
+      } else {
+        pdu.type = SNMP_PDU_RESPONSE;
+        pdu.error = SNMP_ERR_NO_SUCH_NAME;
+        Agentuino.responsePdu(&pdu);
+        Agentuino.freePdu(&pdu);
+        return;
+      }
+
+      pdu.type = SNMP_PDU_GET;
+    }
+    
+    pdu.OID.toString(oid);
+    Serial.println(oid);
     //
-    Serial << "OID: " << oid << endl;
+    //Serial << "OID: " << oid << endl;
     //
     if ( strcmp_P(oid, sysDescr ) == 0 ) {
       // handle sysDescr (set/get) requests
@@ -132,6 +200,22 @@ void pduReceived()
       //
       #ifdef DEBUG
         Serial << F("sysDescr...") << locDescr << F(" ") << pdu.VALUE.size << endl;
+      #endif
+    } else if ( strcmp_P(oid, sysObjectID ) == 0 ) {
+      // handle sysObjectID (set/get) requests
+      if ( pdu.type == SNMP_PDU_SET ) {
+        // response packet from set-request - object is read-only
+        pdu.type = SNMP_PDU_RESPONSE;
+        pdu.error = SNMP_ERR_READ_ONLY;
+      } else {
+        // response packet from get-request - locDescr
+        status = pdu.VALUE.encode(SNMP_SYNTAX_OCTETS, locObjectID);
+        pdu.type = SNMP_PDU_RESPONSE;
+        pdu.error = status;
+      }
+      //
+      #ifdef DEBUG
+        Serial << F("sysObjectID...") << locObjectID << F(" ") << pdu.VALUE.size << endl;
       #endif
     } else if ( strcmp_P(oid, sysUpTime ) == 0 ) {
       // handle sysName (set/get) requests
