@@ -226,21 +226,24 @@ void pduReceived()
       if ( pdu.type == SNMP_PDU_SET ) {
         status = pdu.VALUE.decode(&outlet_command);
         if (outlet_command == 1) {
-          setBit(outlet - 1);
+          setBit(pdu.OID.data[14] - 1);
           updateBits();
         } else if (outlet_command == 2) {
-          resetBit(outlet - 1);
+          resetBit(pdu.OID.data[14] - 1);
           updateBits();
         }
-        parse_outlet_command(pdu.OID.data[14], outlet_command);
       } else {
-        status = pdu.VALUE.encode(SNMP_SYNTAX_INT, translate_outlet_value(pdu.OID.data[14]));
+        if (outlet_values & (1 << (pdu.OID.data[14] - 1)))
+          outlet_command = 1;
+        else
+          outlet_command = 2;
+        status = pdu.VALUE.encode(SNMP_SYNTAX_INT, outlet_command);
       }
       pdu.type = SNMP_PDU_RESPONSE;
       pdu.error = status;
       //
       #ifdef DEBUG
-        Serial << F("outlets1...") << translate_outlet_value(1) << endl;
+        Serial << F("outlets1...") << endl;
       #endif
     } else {
       // oid does not exist
@@ -259,23 +262,6 @@ void pduReceived()
   Agentuino.freePdu(&pdu);
   //
   //Serial << "UDP Packet Received End.." << " RAM:" << freeMemory() << endl;
-}
-
-void parse_outlet_command(unsigned char outlet, int8_t command) {
-  if (command == 1) {
-    setBit(outlet - 1);
-    updateBits();
-  } else if (command == 2) {
-    resetBit(outlet - 1);
-    updateBits();
-  }
-}
-
-int8_t translate_outlet_value(unsigned char outlet) {
-  if (outlet_values & 0x01)
-    return 1;
-  else
-    return 2;
 }
 
 void setup()
