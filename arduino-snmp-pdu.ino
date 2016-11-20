@@ -6,15 +6,13 @@
 */
 #include <Streaming.h>         // Include the Streaming library
 #include <EtherCard.h>          // Include the Ethernet library
-//#include <SPI.h>
 #include <MemoryFree.h>
 #include <Agentuino.h> 
-//#include <Flash.h>
 
 #include <EEPROM.h>
 
-#define DEBUG
-//
+//#define DEBUG
+
 static byte mymac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 #define STATIC 1  // set to 1 to disable DHCP (adjust myip/gwip values below)
@@ -87,19 +85,6 @@ unsigned char outlet_values;
 byte Ethernet::buffer[500]; // tcp/ip send and receive buffer
 
 void udpSerialPrint(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, const char *data, uint16_t len){
-  /*Serial.println("packet!");
-  Serial.print("dest_port: ");
-  Serial.println(dest_port);
-  Serial.print("src_port: ");
-  Serial.println(src_port);
-  
-  
-  Serial.print("src_ip: ");
-  ether.printIp(src_ip);
-  Serial.println();
-  Serial.println("data: ");
-  Serial.println(data);*/
-  
   Agentuino.parsePacket(dest_port, src_ip, src_port, data, len);
 }
 
@@ -107,21 +92,17 @@ void pduReceived()
 {
   SNMP_PDU pdu;
   int8_t outlet_command;
-  //
+
   #ifdef DEBUG
     Serial << F("UDP Packet Received Start..") << F(" RAM:") << freeMemory() << endl;
   #endif
-  //
-  api_status = Agentuino.requestPdu(&pdu);
-  //Serial.println(api_status);
   
-  //
-  //Serial.println(pdu.type, HEX);
+  api_status = Agentuino.requestPdu(&pdu);
+  
   if ( (pdu.type == SNMP_PDU_GET || pdu.type == SNMP_PDU_GET_NEXT || pdu.type == SNMP_PDU_SET)
     && pdu.error == SNMP_ERR_NO_ERROR && api_status == SNMP_API_STAT_SUCCESS ) {
 
     pdu.OID.toString(oid);
-    Serial.println(oid);
     
     if (pdu.type == SNMP_PDU_GET_NEXT) {
       if (strcmp_P(oid, mib2) == 0) {
@@ -181,10 +162,11 @@ void pduReceived()
     }
     
     pdu.OID.toString(oid);
-    Serial.println(oid);
-    //
-    //Serial << "OID: " << oid << endl;
-    //
+    
+    #ifdef DEBUG
+      Serial << "OID: " << oid << endl;
+    #endif
+    
     if ( strcmp_P(oid, sysDescr ) == 0 ) {
       // handle sysDescr (set/get) requests
       if ( pdu.type == SNMP_PDU_SET ) {
@@ -336,16 +318,13 @@ void pduReceived()
       pdu.type = SNMP_PDU_RESPONSE;
       pdu.error = SNMP_ERR_NO_SUCH_NAME;
     }
-    //
-    //Serial.println("END");
     Agentuino.responsePdu(&pdu);
   }
-  //Serial.println("NOK");
-  //  while(1);
-  //
   Agentuino.freePdu(&pdu);
-  //
-  //Serial << "UDP Packet Received End.." << " RAM:" << freeMemory() << endl;
+  
+  #ifdef DEBUG
+    Serial << "UDP Packet Received End.." << " RAM:" << freeMemory() << endl;
+  #endif
 }
 
 void setup()
